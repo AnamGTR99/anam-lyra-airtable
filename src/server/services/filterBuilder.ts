@@ -1,11 +1,12 @@
 import type { FilterConfig } from '~/types/db';
-import type { Prisma } from '@prisma/client';
 
 /**
  * Builds a Prisma WHERE clause from filter configuration
  * Supports JSONB queries for efficient filtering at scale
+ * 
+ * NOTE: Placeholder for Phase 2 - will be fully implemented with Row routers
  */
-export function buildFilterQuery(filterConfig: FilterConfig): Prisma.RowWhereInput {
+export function buildFilterQuery(filterConfig: FilterConfig): Record<string, any> {
     if (!filterConfig.conditions || filterConfig.conditions.length === 0) {
         return {};
     }
@@ -44,37 +45,17 @@ export function buildFilterQuery(filterConfig: FilterConfig): Prisma.RowWhereInp
                 };
             case 'isEmpty':
                 return {
-                    OR: [
-                        {
-                            data: {
-                                path: [columnId],
-                                equals: Prisma.DbNull,
-                            },
-                        },
-                        {
-                            data: {
-                                path: [columnId],
-                                equals: '',
-                            },
-                        },
-                    ],
+                    data: {
+                        path: [columnId],
+                        equals: null,
+                    },
                 };
             case 'isNotEmpty':
                 return {
-                    AND: [
-                        {
-                            data: {
-                                path: [columnId],
-                                not: Prisma.DbNull,
-                            },
-                        },
-                        {
-                            data: {
-                                path: [columnId],
-                                not: '',
-                            },
-                        },
-                    ],
+                    data: {
+                        path: [columnId],
+                        not: null,
+                    },
                 };
             default:
                 return {};
