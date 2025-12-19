@@ -1,50 +1,27 @@
 "use client";
 
-import { useState } from "react";
-
 import { api } from "~/trpc/react";
 
+/**
+ * Placeholder component for initial deployment
+ * Will be replaced with Lyra UI components in Phase 2
+ */
 export function LatestPost() {
-  const [latestPost] = api.post.getLatest.useSuspenseQuery();
-
-  const utils = api.useUtils();
-  const [name, setName] = useState("");
-  const createPost = api.post.create.useMutation({
-    onSuccess: async () => {
-      await utils.post.invalidate();
-      setName("");
-    },
-  });
+  const hello = api.post.hello.useQuery({ text: "Lyra Airtable Clone" });
 
   return (
     <div className="w-full max-w-xs">
-      {latestPost ? (
-        <p className="truncate">Your most recent post: {latestPost.name}</p>
-      ) : (
-        <p>You have no posts yet.</p>
-      )}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          createPost.mutate({ name });
-        }}
-        className="flex flex-col gap-2"
-      >
-        <input
-          type="text"
-          placeholder="Title"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-full bg-white/10 px-4 py-2 text-white"
-        />
-        <button
-          type="submit"
-          className="rounded-full bg-white/10 px-10 py-3 font-semibold transition hover:bg-white/20"
-          disabled={createPost.isPending}
-        >
-          {createPost.isPending ? "Submitting..." : "Submit"}
-        </button>
-      </form>
+      <div className="rounded-lg bg-white/10 p-6">
+        <h3 className="text-lg font-semibold text-white mb-2">
+          🚀 Phase 1 Complete
+        </h3>
+        <p className="text-white/80 text-sm mb-4">
+          {hello.data?.greeting ?? "Loading..."}
+        </p>
+        <p className="text-white/60 text-xs">
+          Foundation is ready. Next: Implement Lyra routers and UI.
+        </p>
+      </div>
     </div>
   );
 }
