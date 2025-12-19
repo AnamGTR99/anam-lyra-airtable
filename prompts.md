@@ -1,42 +1,33 @@
-It is engineered to ensure the agent doesn't just "build a table," but builds the high-performance engine you’ve architected.
+This build error is a classic "boilerplate clash." The **T3 Stack** comes with a default "Post" feature, but your **Phase 1 infrastructure** work replaced the underlying schema and likely the router logic to support the **Airtable Base/Table** architecture. Your `src/app/page.tsx` is still trying to fetch a "Post" that no longer exists in your code.
 
-Part 1: The Day 1 Master Prompt
-Copy and paste this into your coding agent:
+Here is a surgical prompt to give your coding agent to clear these errors and align the frontend with your new architecture.
 
-Role: High-Performance Full-Stack Engineer / Lead Architect.
+### The "Build Fix" Master Prompt
 
-Project Context: I am building a high-agency Airtable clone ("Lyra") using the T3 Stack. The core engineering challenge is maintaining 60fps performance and sub-100ms database operations at a scale of 1 Million rows.
+> **Role**: Senior TypeScript Engineer
+> **Context**: The project build is failing with a `Type error: Property 'getLatest' does not exist on type 'DecorateRouterRecord'`. This is because the boilerplate code in `src/app/page.tsx` is referencing the default T3 'post' router which we have refactored or removed to support our Airtable clone architecture.
+> **Task**: Clean up the boilerplate and align the landing page with the new schema.
+> **Instructions**:
+> 1. **Clean Landing Page**: Open `src/app/page.tsx`. Remove the `void api.post.getLatest.prefetch()` call and any references to `api.post`.
+> 2. **Refactor UI**: Update the landing page to be a simple "Lyra Dashboard" starter. If `session` exists, show a "Create New Base" button (referencing your `base.create` mutation) and a list of existing bases (referencing `base.list`).
+> 3. **Router Audit**: Check `src/server/api/root.ts` and `src/server/api/routers/`. If the `post.ts` router still exists and isn't being used for the Airtable logic, delete it and remove its reference from the root router to prevent further type confusion.
+> 4. **Type Sync**: Ensure all tRPC procedures called in the frontend exist in your new routers (`base`, `table`, etc.) defined in Phase 1.
+> 5. **Verify**: Run `npm run build` after changes to ensure all type errors are resolved.
+> 
+> 
+> **Goal**: Achieve a successful build where the landing page correctly initiates the "Airtable Workspace" flow rather than the default "T3 Post" flow.
 
-Task: Initialize the project infrastructure and the Hybrid JSONB/Relational Schema.
+---
 
-Instructions:
+### Why this happened
 
-Scaffold Project: Initialize a T3 Stack app in the current directory (npm create t3-app@latest). Select: TypeScript, Prisma, Tailwind, tRPC, and NextAuth (Google Provider).
+When you implemented the **Hybrid JSONB schema**, the `Post` model in `prisma/schema.prisma` was likely deleted or renamed. The tRPC hooks are auto-generated based on your server-side routers. Since the `post` router was "to be replaced", the TypeScript compiler is correctly telling you that `getLatest` is now a "ghost" property.
 
-Directory Structure: Create the following directory tree as defined in my lyra-complete-plan.md:
+### Quick Manual Check
 
-src/server/api/validators/ (for Zod filters/sorts)
+If you want to verify this yourself before running the prompt:
 
-src/server/services/ (for bulk insert and query builders)
+1. **Check `src/server/api/root.ts**`: See if `post` is still in the `appRouter`.
+2. **Check `src/app/page.tsx**`: You'll see a large block of code at the bottom of the file (usually a `CRUD` component) that specifically uses `api.post.create.useMutation` and `api.post.getLatest.useQuery`. **Delete that entire component.**
 
-src/state/ (for Zustand focus/grid state)
-
-src/styles/ (for design tokens)
-
-Prisma Schema (Hybrid JSONB): Implement the schema from the Ultra-Refined Plan.
-
-IMPORTANT: Do NOT create a 'Cells' table. Use a Row model with a data Json column to avoid the "Join Explosion."
-
-Define Base, Table, Column (with ColumnType enum: TEXT, NUMBER), and TableView (storing filterConfig and sortConfig as JSON).
-
-Database Migration:
-
-Run npx prisma migrate dev --name init_hybrid_schema.
-
-Post-Migration Step: Create a raw SQL migration to add a GIN index on Row.data and a composite index on (tableId, order).
-
-Design System: Create src/styles/design-system.css. Initialize it with the Airtable color palette and a fixed 35px row height variable (--row-height: 35px;).
-
-Type-Safety: Ensure that RowData and FilterCondition types are globally available in src/types/.
-
-Definition of Done: The project is scaffolded, the database is migrated with the correct indexes, and the folder structure matches the plan. Report back with the completed file tree.
+**If you like, I can draft a "Day 2 Starter" prompt next to help your agent build out the actual Base/Table list UI so you don't just have a blank page.**
