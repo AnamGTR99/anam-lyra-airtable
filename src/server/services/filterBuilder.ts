@@ -1,5 +1,5 @@
 import type { FilterConfig } from '~/types/db';
-import type { Prisma } from '~/generated/prisma';
+import type { Prisma } from '@prisma/client';
 
 /**
  * Builds a Prisma WHERE clause from filter configuration

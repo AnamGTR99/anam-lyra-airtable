@@ -1,5 +1,5 @@
 import type { SortConfig } from '~/types/db';
-import type { Prisma } from '~/generated/prisma';
+import type { Prisma } from '@prisma/client';
 
 /**
  * Builds a Prisma ORDER BY clause from sort configuration
