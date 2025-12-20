@@ -2,10 +2,10 @@ import Link from "next/link";
 
 import { LatestPost } from "~/app/_components/post";
 import { auth } from "~/server/auth";
-import { api, HydrateClient } from "~/trpc/server";
+import { HydrateClient } from "~/trpc/server";
 
 export default async function Home() {
-  const hello = await api.post.hello({ text: "from Lyra" });
+  const greeting = "from Lyra";
   const session = await auth();
 
   return (
@@ -42,7 +42,7 @@ export default async function Home() {
 
           <div className="flex flex-col items-center gap-2">
             <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading..."}
+              {greeting}
             </p>
 
             <div className="flex flex-col items-center justify-center gap-4">
