@@ -1,7 +1,6 @@
 # Lyra Airtable Clone – Current Progress (Detailed Update)
 
 **Date:** December 20, 2025  
-**Session Time:** 10:40 – 10:55 (UTC+4)
 
 ---
 
@@ -91,3 +90,20 @@ As long as new procedures are added to the registered routers and the client imp
 - **Documentation**: Updated `IMPLEMENTATION_STATUS.md`, `current_progress.md`, and `prompts.md` to reflect Phase 2 work and rationale.
 
 These steps align with the requirements in *Lyra‑airtable‑clone (1).pdf* and the `lyra‑complete‑plan.md` roadmap.
+
+## 🚀 Phase 2 – Stress Test & Logic Verification (In Progress)
+
+Following the implementation of the core engine, we initiated a massive **1,000,000 row stress test** to validate the "Ultimate Goal" requirement (<100ms search, scale-proof architecture).
+
+### Key Actions:
+1.  **Created `load-test.ts`**: A script to push 1M rows into the database.
+2.  **Created `verify-logic.ts`**: A script to verify filter, sort, and search performance at scale.
+3.  **Refactored for Memory Safety**: The initial load test crashed due to V8 heap limits. We refactored `load-test.ts` to use safe, chunked batching (20k rows/batch) with explicit garbage collection hints.
+4.  **Optimized for Throughput**: The initial tRPC-based load test was too slow (~47s per 20k rows) due to middleware overhead. We "supercharged" it by **bypassing tRPC and calling the `bulkInsertRows` service directly**, reducing insert time to **~30s per 20k batch** (limited by network latency to Neon).
+
+### Current Status:
+- **Load Test**: Running in the background. Stable at ~30s per 20k rows.
+- **Verification**: `verify-logic.ts` is ready to run once the data load completes.
+- **Goal**: Confirm sub-100ms search latency on the 1M row dataset.
+
+We are proving that the Hybrid JSONB architecture works not just in theory, but in a real-world, high-volume stress test.

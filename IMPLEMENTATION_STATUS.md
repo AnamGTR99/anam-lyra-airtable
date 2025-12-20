@@ -40,6 +40,10 @@
 - Updated `src/env.js` and `src/server/auth/config.ts` to validate the new variables.
 - Generated `AUTH_SECRET` with `npx auth secret` and stored it in `.env.local` and Vercel.
 
+| **Deployment status** | Live on Vercel |
+| **Auth variables** | All present in `.env.local` and Vercel dashboard |
+| **Stress Test Status** | 🔄 Running Optimized (31s/batch) |
+
 ### 8. Deployment
 - Resolved a cascade of build errors (missing env vars, stale `post` router, Prisma v6 type clash).
 - Successfully built and deployed to Vercel: `https://anam-lyra-airtable.vercel.app`.
