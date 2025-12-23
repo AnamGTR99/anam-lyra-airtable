@@ -102,14 +102,14 @@ Following the implementation of the core engine, we initiated a massive **1,000,
 4.  **Optimized for Throughput**: The initial tRPC-based load test was too slow (~47s per 20k rows) due to middleware overhead. We "supercharged" it by **bypassing tRPC and calling the `bulkInsertRows` service directly**, reducing insert time to **~30s per 20k batch** (limited by network latency to Neon).
 
 ### Current Status:
-- **Hour 3 (UI Shell & Admin Bypass) Results**:
-    *   **Admin Bypass**: `src/server/auth.ts` configured to auto-login as "stress-test-user" in Dev mode.
-    *   **Design Tokens**: `design-system.css` updated with pixel-perfect Airtable hex codes.
-    *   **Components Built**:
-        *   `Sidebar`: Multi-section navigation with "Create" button.
-        *   `BaseHeader`: Tabbed interface for Tables (Data/Auto/Interfaces).
-        *   `Toolbar`: Full suite of view controls + wired **"Add 100k rows"** button.
-    *   **Integration**: `localhost:3000` now redirects to the last active Base, rendering the full Shell.
-- **Next Step**: **Hour 4: TanStack Virtualization**. The "Grid Visualization Loading" placeholder needs to be replaced with the real 60fps virtualized table.
+- **Sub-Prompt 3a (Pixel-Perfect Shell) Results**:
+    *   **Deploy Workflow**: Code pushed to Vercel (Git SHA: `baeb61a`).
+    *   **Visual Fidelity**: 
+        *   Removed all "Lyra" branding (Title set to "Airtable", "Welcome to Airtable").
+        *   Implemented 1:1 Color Tokens (`#116df7`, `#f5f5f5`).
+        *   Added **Skeleton Loaders** for Sidebar and Grid.
+    *   **Components**: Sidebar, BaseHeader, Toolbar, and Skeletons are in place.
+    *   **Readiness**: Admin Bypass via `process.env.ADMIN_BYPASS` configured for preview testing.
+- **Next Step**: **Hour 4: TanStack Virtualization**. The "Grid Visualization Loading..." placeholder is ready to be replaced by the 60fps virtualized table.
 
-**Hour 3 Complete.** The app looks like Airtable; now we must make it perform like Airtable.
+**Hour 3 Complete.** The Shell is live. Ready for the Engine.

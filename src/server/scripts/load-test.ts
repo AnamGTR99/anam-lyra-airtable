@@ -1,5 +1,6 @@
 import { db } from "../db";
 import { type RowData } from "../../types/db";
+import { type Column } from "@prisma/client";
 import { bulkInsertRows } from "../services/bulkInsertOptimized";
 import { createCaller } from "../api/root";
 import fs from "fs";
@@ -66,8 +67,8 @@ async function main() {
         include: { table: { include: { columns: true } } }
     });
 
-    let columns;
-    let tableId;
+    let columns: Column[] = [];
+    let tableId: string = "";
 
     if (!job) {
         console.log("⚠️ No pending job found. Creating a NEW test job...");
@@ -88,8 +89,13 @@ async function main() {
     } else {
         console.log(`Found existing job ${job.id} (Status: ${job.status})`);
         tableId = job.tableId;
-        columns = job.table.columns;
-        // If columns are missing from relation include (shouldn't be if typed correctly), fetch them
+
+        // Typesafety: ensure columns are typed correctly from the include
+        if (job.table && job.table.columns) {
+            columns = job.table.columns;
+        }
+
+        // If columns are missing (shouldn't be if typed correctly), fetch them
         if (!columns || columns.length === 0) {
             columns = await db.column.findMany({ where: { tableId } });
         }
@@ -126,7 +132,6 @@ async function main() {
     // 3. Generator & Processing Loop
     const totalNeeded = job.totalRows;
     const pool: Promise<void>[] = [];
-    const overallStart = performance.now();
 
     async function processBatch(offset: number, size: number, batchIndex: number) {
         try {
@@ -134,7 +139,6 @@ async function main() {
             const rows: RowData[] = new Array(size);
             for (let i = 0; i < size; i++) {
                 const row: RowData = {};
-                //@ts-ignore
                 columns.forEach((col) => {
                     if (col.type === "NUMBER") {
                         row[col.id] = Math.floor(Math.random() * 10000);

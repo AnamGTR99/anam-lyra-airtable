@@ -25,7 +25,7 @@ async function main() {
 
     // 1. Find the 1M row table
     const base = await db.base.findFirst({
-        where: { userId: MOCK_USER_ID, name: "1M Load Test Base" },
+        where: { createdById: MOCK_USER_ID, name: "1M Load Test Base" },
         orderBy: { createdAt: "desc" },
     });
     if (!base) throw new Error("Base not found. Run load-test.ts first.");
@@ -65,7 +65,7 @@ async function main() {
     const startFilter = performance.now();
     const filteredRows = await caller.row.list({
         tableId: table.id,
-        take: 10,
+        limit: 10,
         filter: {
             logic: "AND",
             conditions: [{ columnId: textCol.id, operator: "contains", value: "Row 500" }],
@@ -81,7 +81,7 @@ async function main() {
     const startNum = performance.now();
     await caller.row.list({
         tableId: table.id,
-        take: 10,
+        limit: 10,
         filter: {
             logic: "AND",
             conditions: [{ columnId: numCol.id, operator: "gt", value: 5000 }],
