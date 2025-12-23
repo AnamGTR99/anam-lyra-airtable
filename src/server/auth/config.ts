@@ -1,3 +1,4 @@
+import { env } from "~/env";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
@@ -32,7 +33,17 @@ declare module "next-auth" {
  */
 export const authConfig = {
   providers: [
-    GoogleProvider,
+    GoogleProvider({
+      clientId: (process.env.AUTH_GOOGLE_ID ?? "").replace(/['"]+/g, "").trim(),
+      clientSecret: (process.env.AUTH_GOOGLE_SECRET ?? "").replace(/['"]+/g, "").trim(),
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+    }),
     /**
      * ...add more providers here.
      *

@@ -66,7 +66,7 @@ export function BaseHeader({ baseName, tables, activeTableId }: BaseHeaderProps)
             </div>
 
             {/* Table Tabs Bar */}
-            <div className="flex items-center h-[40px] px-2 bg-[#1b62cc] overflow-x-auto scrollbar-hide">
+            <div className="flex items-center h-[56px] px-2 bg-[#1b62cc] overflow-x-auto scrollbar-hide">
                 {tables.map(table => (
                     <div
                         key={table.id}

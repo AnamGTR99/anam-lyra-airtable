@@ -102,14 +102,10 @@ Following the implementation of the core engine, we initiated a massive **1,000,
 4.  **Optimized for Throughput**: The initial tRPC-based load test was too slow (~47s per 20k rows) due to middleware overhead. We "supercharged" it by **bypassing tRPC and calling the `bulkInsertRows` service directly**, reducing insert time to **~30s per 20k batch** (limited by network latency to Neon).
 
 ### Current Status:
-- **Sub-Prompt 3a (Pixel-Perfect Shell) Results**:
-    *   **Deploy Workflow**: Code pushed to Vercel (Git SHA: `baeb61a`).
-    *   **Visual Fidelity**: 
-        *   Removed all "Lyra" branding (Title set to "Airtable", "Welcome to Airtable").
-        *   Implemented 1:1 Color Tokens (`#116df7`, `#f5f5f5`).
-        *   Added **Skeleton Loaders** for Sidebar and Grid.
-    *   **Components**: Sidebar, BaseHeader, Toolbar, and Skeletons are in place.
-    *   **Readiness**: Admin Bypass via `process.env.ADMIN_BYPASS` configured for preview testing.
-- **Next Step**: **Hour 4: TanStack Virtualization**. The "Grid Visualization Loading..." placeholder is ready to be replaced by the 60fps virtualized table.
+- **Priority 1: OAuth Fix Implemented**:
+    *   **Config Updated**: `src/server/auth.ts` now uses `env.js` imports and explicit `authorization` params to ensure correct Google Handshake.
+    *   **Vercel Env Sync**: Manually forced `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` into Vercel Production Environment using CLI.
+    *   **Deployment**: Triggered fresh redeploy (SHA `24f0f73`) to pick up new env vars.
+- **Next Step**: **Hour 4: TanStack Virtualization**. Once Auth is verified, we proceed immediately to the 60fps grid.
 
-**Hour 3 Complete.** The Shell is live. Ready for the Engine.
+**Waiting for Vercel Deployment to finishing building...**

@@ -32,7 +32,7 @@ export function Toolbar({ tableId, onBulkInsert }: { tableId?: string, onBulkIns
     };
 
     return (
-        <div className="flex items-center justify-between h-[56px] px-4 border-b border-[#e1e1e1] bg-white">
+        <div className="flex items-center justify-between h-[48px] px-4 border-b border-[#e1e1e1] bg-white">
             {/* Left: View Controls */}
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1.5 px-2 py-1.5 bg-[#f5f5f5] hover:bg-gray-200 rounded cursor-pointer transition-colors">
@@ -66,7 +66,7 @@ export function Toolbar({ tableId, onBulkInsert }: { tableId?: string, onBulkIns
                 <button
                     onClick={handleBulkInsert}
                     disabled={startBulkInsert.isPending || isIngesting || !tableId}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded border border-purple-200 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-transparent hover:bg-gray-50 text-gray-600 rounded border border-gray-300 transition-colors disabled:opacity-50"
                 >
                     <Database className="w-3.5 h-3.5" />
                     <span className="text-[13px] font-medium">
