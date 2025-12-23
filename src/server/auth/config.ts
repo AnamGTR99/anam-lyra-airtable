@@ -45,12 +45,29 @@ export const authConfig = {
   ],
   adapter: PrismaAdapter(db as any),
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: ({ session, user }) => {
+      // Admin Bypass for Development or Vercel Preview
+      if (process.env.NODE_ENV === "development" || process.env.ADMIN_BYPASS === "true") {
+        return {
+          ...session,
+          user: {
+            ...session.user,
+            id: "stress-test-user", // Matches load-test.ts
+            name: "Admin Developer",
+            email: "admin@lyra.com",
+            image: "",
+          },
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        };
+      }
+
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+        },
+      };
+    },
   },
 } satisfies NextAuthConfig;

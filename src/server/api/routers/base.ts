@@ -25,9 +25,27 @@ export const baseRouter = createTRPCRouter({
     list: protectedProcedure.query(async ({ ctx }) => {
         const bases = await db.base.findMany({
             where: { createdById: ctx.session.user.id },
+            orderBy: { createdAt: "desc" }
         });
         return bases;
     }),
+
+    /** Get Base by ID with Tables */
+    getById: protectedProcedure
+        .input(z.object({ id: z.string().cuid() }))
+        .query(async ({ ctx, input }) => {
+            await ensureOwnership(ctx.session.user.id, input.id);
+            const base = await db.base.findUnique({
+                where: { id: input.id },
+                include: {
+                    tables: {
+                        orderBy: { createdAt: "asc" }
+                    }
+                }
+            });
+            if (!base) throw new Error("Base not found");
+            return base;
+        }),
 
     /** Delete a Base (cascades tables & rows) */
     delete: protectedProcedure

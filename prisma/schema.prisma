@@ -42,8 +42,31 @@ model Table {
     columns Column[]
     rows    Row[]
     views   TableView[]
+    ingestionJobs IngestionJob[]
 
     @@index([baseId])
+}
+
+enum IngestionStatus {
+    PENDING
+    PROCESSING
+    COMPLETED
+    FAILED
+}
+
+model IngestionJob {
+    id           String          @id @default(cuid())
+    status       IngestionStatus @default(PENDING)
+    progress     Float           @default(0.0)
+    totalRows    Int
+    errorMessage String?
+    createdAt    DateTime        @default(now())
+    updatedAt    DateTime        @updatedAt
+
+    table   Table  @relation(fields: [tableId], references: [id], onDelete: Cascade)
+    tableId String
+
+    @@index([tableId])
 }
 
 enum ColumnType {

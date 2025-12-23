@@ -81,4 +81,27 @@ export const rowRouter = createTRPCRouter({
             await bulkInsertRows(input.tableId, input.rows);
             return { success: true };
         }),
+
+    /** Start async bulk insert job */
+    startBulkInsert: protectedProcedure
+        .input(z.object({
+            tableId: z.string().cuid(),
+            totalRows: z.number().int().positive()
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const table = await db.table.findUnique({ where: { id: input.tableId }, select: { baseId: true } });
+            if (!table) throw new Error("Table not found");
+            await ensureOwnership(ctx.session.user.id, table.baseId);
+
+            // Create IngestionJob
+            const job = await db.ingestionJob.create({
+                data: {
+                    tableId: input.tableId,
+                    status: 'PENDING',
+                    totalRows: input.totalRows,
+                }
+            });
+
+            return { jobId: job.id };
+        }),
 });

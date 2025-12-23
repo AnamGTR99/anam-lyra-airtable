@@ -13,27 +13,61 @@ export async function bulkInsertRows(
     tableId: string,
     rowsData: RowData[]
 ): Promise<number> {
+    const t0 = performance.now();
     if (rowsData.length === 0) {
         return 0;
     }
 
-    // Generate values for SQL query
     const now = new Date();
-    const values = rowsData.map((data, index) => {
-        const id = `row_${Date.now()}_${index}`;
-        const jsonData = JSON.stringify(data);
-        return `('${id}', '${jsonData}'::jsonb, ${index}, '${tableId}', '${now.toISOString()}', '${now.toISOString()}')`;
-    }).join(',\n  ');
+    const nowIso = now.toISOString();
 
-    // Use raw SQL with UNNEST-like VALUES for bulk insert
+    const ids: string[] = new Array(rowsData.length);
+    const dataJsons: string[] = new Array(rowsData.length);
+    const orders: number[] = new Array(rowsData.length);
+
+    // 2. Pre-Stringified JSONB & 3. Aggressive Type Stripping
+    // moving JSON stringification to app layer and creating flat arrays
+    for (let i = 0; i < rowsData.length; i++) {
+        // Simple numeric ID suffix for uniqueness in batch, collision unlikely with timestamp
+        ids[i] = `row_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}`;
+        dataJsons[i] = JSON.stringify(rowsData[i]);
+        orders[i] = i;
+    }
+
+    const t1 = performance.now();
+    const buildPayloadMs = t1 - t0;
+
+    // 1. SQL Strategy (UNNEST)
+    // Using parameterized query with arrays to prevent string explosion
     const query = `
     INSERT INTO "Row" (id, data, "order", "tableId", "createdAt", "updatedAt")
-    VALUES
-      ${values}
+    SELECT 
+      unnest($1::text[]), 
+      unnest($2::jsonb[]), 
+      unnest($3::integer[]), 
+      $4, 
+      $5::timestamp, 
+      $6::timestamp
     ON CONFLICT DO NOTHING;
-  `;
+    `;
 
-    await db.$executeRawUnsafe(query);
+    // 5. Memory Scoping: Arrays will be GC'd after function exit
+
+    await db.$executeRawUnsafe(
+        query,
+        ids,
+        dataJsons,
+        orders,
+        tableId,
+        nowIso,
+        nowIso
+    );
+
+    const t2 = performance.now();
+    const dbRoundTripMs = t2 - t1;
+
+    // 4. Diagnostic Benchmarking
+    console.log(`[BulkInsert] Payload Build: ${buildPayloadMs.toFixed(2)}ms | DB Round Trip: ${dbRoundTripMs.toFixed(2)}ms | Rows: ${rowsData.length}`);
 
     return rowsData.length;
 }
