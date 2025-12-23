@@ -43,6 +43,9 @@ export const baseRouter = createTRPCRouter({
                         include: {
                             _count: {
                                 select: { rows: true }
+                            },
+                            columns: {
+                                orderBy: { order: "asc" }
                             }
                         }
                     }

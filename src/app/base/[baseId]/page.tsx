@@ -25,9 +25,12 @@ export default function BasePage({ params }: { params: Promise<{ baseId: string 
         }
     }, [base, activeTableId]);
 
-    const handleBulkInsert = () => {
-        // Invalidate queries or refresh logic if needed
-        // For now the Toolbar mutation handles the job creation
+    const utils = api.useUtils();
+
+    const handleBulkInsert = async () => {
+        // Invalidate counts and row data
+        await utils.base.getById.invalidate({ id: baseId });
+        await utils.row.listInfinite.invalidate();
     };
 
     if (isLoading) return (
@@ -66,7 +69,11 @@ export default function BasePage({ params }: { params: Promise<{ baseId: string 
                 {/* Grid Visualization */}
                 <div className="flex-1 overflow-hidden relative">
                     {activeTableId ? (
-                        <GridContainer count={base.tables.find((t) => t.id === activeTableId)?._count?.rows ?? 0} />
+                        <GridContainer
+                            tableId={activeTableId}
+                            count={base.tables.find((t) => t.id === activeTableId)?._count?.rows ?? 0}
+                            columns={base.tables.find((t) => t.id === activeTableId)?.columns}
+                        />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-gray-400 bg-gray-50/50">
                             Select a table

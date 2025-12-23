@@ -82,6 +82,47 @@ export const rowRouter = createTRPCRouter({
             return { success: true };
         }),
 
+    /** List rows with infinite scrolling (cursor-based offset) */
+    listInfinite: protectedProcedure
+        .input(
+            z.object({
+                tableId: z.string().cuid(),
+                limit: z.number().int().min(1).max(100).default(50),
+                cursor: z.number().nullish(), // logic: cursor is the offset
+                filter: z.any().optional(),
+                sort: z.any().optional(),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            const limit = input.limit ?? 50;
+            const offset = input.cursor ?? 0;
+
+            const table = await db.table.findUnique({ where: { id: input.tableId }, select: { baseId: true } });
+            if (!table) throw new Error("Table not found");
+            await ensureOwnership(ctx.session.user.id, table.baseId);
+
+            const where = input.filter ? buildFilterQuery(input.filter) : {};
+            const orderBy = input.sort ? buildSortQuery(input.sort) : [{ order: "asc" }];
+
+            const rows = await db.row.findMany({
+                where: { ...where, tableId: input.tableId },
+                orderBy,
+                take: limit + 1, // fetch one extra to determine if there is a next page
+                skip: offset,
+            });
+
+            let nextCursor: typeof offset | undefined = undefined;
+            if (rows.length > limit) {
+                const nextItem = rows.pop();
+                nextCursor = offset + limit;
+            }
+
+            return {
+                items: rows,
+                nextCursor,
+            };
+        }),
+
     /** Start async bulk insert job */
     startBulkInsert: protectedProcedure
         .input(z.object({

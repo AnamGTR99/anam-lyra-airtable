@@ -2,6 +2,7 @@
 
 import { api } from "~/trpc/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
     Home,
     Star,
@@ -12,7 +13,20 @@ import {
 import { Skeleton } from "~/app/_components/Skeleton";
 
 export function Sidebar({ className }: { className?: string }) {
+    const router = useRouter();
+    const utils = api.useUtils();
     const { data: bases, isLoading } = api.base.list.useQuery();
+
+    const createBase = api.base.create.useMutation({
+        onSuccess: async (newBase) => {
+            await utils.base.list.invalidate();
+            router.push(`/base/${newBase.id}`);
+        },
+    });
+
+    const handleCreate = () => {
+        createBase.mutate({ name: "Untitled Base" });
+    };
 
     return (
         <div className={`w-[260px] flex-shrink-0 h-full bg-[#f5f5f5] border-r border-[#e1e1e1] flex flex-col ${className}`}>
@@ -53,9 +67,13 @@ export function Sidebar({ className }: { className?: string }) {
             </div>
 
             {/* Create Button */}
-            <button className="mt-auto m-4 bg-[#116df7] hover:bg-[#0e59ca] text-white rounded-full py-2 px-6 flex items-center justify-center font-medium">
+            <button
+                onClick={handleCreate}
+                disabled={createBase.isPending}
+                className="mt-auto m-4 bg-[#116df7] hover:bg-[#0e59ca] text-white rounded-full py-2 px-6 flex items-center justify-center font-medium disabled:opacity-50"
+            >
                 <Plus className="w-4 h-4 mr-2" />
-                <span>Create</span>
+                <span>{createBase.isPending ? "Creating..." : "Create"}</span>
             </button>
         </div>
     );

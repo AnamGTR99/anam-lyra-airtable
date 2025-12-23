@@ -106,6 +106,42 @@ Following the implementation of the core engine, we initiated a massive **1,000,
     *   **Config Updated**: `src/server/auth.ts` now uses `env.js` imports and explicit `authorization` params to ensure correct Google Handshake.
     *   **Vercel Env Sync**: Manually forced `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` into Vercel Production Environment using CLI.
     *   **Deployment**: Triggered fresh redeploy (SHA `24f0f73`) to pick up new env vars.
-- **Next Step**: **Hour 4: TanStack Virtualization**. Once Auth is verified, we proceed immediately to the 60fps grid.
 
-**Waiting for Vercel Deployment to finishing building...**
+---
+
+### 🎨 Hour 3: The "Airtable 1:1" UI Reconstruction (Completed)
+
+We achieved a pixel-perfect "Airtable 1:1" layout match, removing all legacy "Lyra" branding.
+
+*   **Master Flex Layout**: Implemented the "Holy Grail" structure (`flex-1 flex flex-col h-full overflow-hidden`) in `src/app/base/[baseId]/page.tsx` and the root layout.
+*   **Sidebar (1:1 Match)**: Locked width to `260px`, matched font sizing (`14px`, `#666666`), and styled the `+ Create` button to spec.
+*   **Header & Toolbar**:
+    *   **BaseHeader**: Table Tabs bar height set to `56px`.
+    *   **Toolbar**: Height `48px`. Added the "Add 100k rows" ghost button wired to `row.startBulkInsert`.
+*   **Branding**: Removed all user-facing "Lyra" mentions.
+
+---
+
+### 🛠️ Phase 4a: The Virtualized Foundation (Completed)
+
+We successfully implemented the high-performance scrolling shell using **TanStack Virtual v3**.
+
+*   **Component**: Created `GridContainer` in `src/app/_components/Grid.tsx`.
+*   **Virtualizer Config**:
+    *   `fixed` item size of **35px**.
+    *   `overscan: 20` for smooth scrolling.
+    *   Hardware acceleration via `position: absolute` and `transform: translateY`.
+*   **Integration**:
+    *   Updated `base.getById` router to include `_count: { select: { rows: true } }`.
+    *   Passes the *real* row count (445k+) to the virtualizer.
+*   **Outcome**: The live deployment (`https://anam-lyra-airtable.vercel.app`) now supports scrolling through an "infinite" 15.5 million pixel viewport (445k rows * 35px) without crashing.
+
+---
+
+### 🚧 The "Phase 4b" Detour
+
+**Next Step**: Before we pour the 445k rows of data into the virtual slots (Phase 4b), we are taking a strategic detour to refine the **Data Pipeline**.
+
+*   **Goal**: Ensure the bi-directional data fetching (tRPC Infinite Query) is robust enough to handle the sheer volume of data we just verified the scrollbar can handle.
+*   **Status**: Preparing prompts for the Data Pipeline refinement.
+

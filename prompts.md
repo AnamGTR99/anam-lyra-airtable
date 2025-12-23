@@ -1,64 +1,51 @@
-Anam, you are 100% correct. Trying to shove virtualization, infinite scrolling, keyboard navigation, and optimistic editing into a single prompt is how bugs get "baked into" the foundation.
+This is the most critical pivot point in the project. You've built a 15-million-pixel tall "ghost" scrollbar, but without wiring the **tRPC data pipeline**, you're just scrolling through empty space.
 
-Breaking this into **Three Focused Sprints** ensures the agent handles the complex coordinate math of the virtualizer before we layer on the interaction logic. This is the professional way to build a high-performance engine.
+We are going to skip the "pretty" sidebar polish and focus on the **"Functional Plumbing."** This prompt will turn those dead buttons into triggers and pour your **445k rows** into that virtualized container so you can actually verify the "Airtable-scale" performance.
 
----
-
-### 🗺️ The Grid Implementation Roadmap
-
-| Sub-Phase | Focus | PDF Requirement Addressed |
-| --- | --- | --- |
-| **4a: The Virtual Foundation** | Coordinate math, 60fps scrolling, 1M row height. | "Scroll down without lag" 
-
- |
-| **4b: The Data Pipeline** | tRPC Infinite Query, bi-directional fetching. | "Virtualized infinite scroll" 
-
- |
-| **4c: The Interaction Layer** | Arrow keys, Tab, Enter, Cell Editing. | "Arrow keys + tab key should move me smoothly" 
-
- |
-
----
-
-### 🛠️ Sub-Phase 4a: The Virtualized Foundation (Coordinate Math)
+### 🛠️ The "Functional Wiring" Detour Prompt
 
 **Copy and paste this into Antigravity:**
 
-> **Role**: Senior Performance Engineer
-> **Objective**: Implement the core virtualization shell using **TanStack Virtual v3** to handle the vertical scroll of 445k+ rows.
-> **Task 1: The High-Performance Viewport**
-> * Create a `GridContainer` component with `overflow: auto` and `position: relative`.
-> * Implement `useVirtualizer` targeting this container.
+> **Role**: Lead Full-Stack Engineer
+> **Objective**: Bridge the gap between the UI Shell and the High-Performance Backend. Wire the navigation, creation, and data-fetching logic so the 445k-row grid becomes testable.
+> **Task 1: The "Auto-Select" Navigation Hook**
+> * In `src/app/page.tsx`, implement a logic check using `api.base.list.useQuery`.
+> * **Logic**: If the user has bases, automatically use `router.push` to navigate them to the first `baseId` in the list (e.g., `/base/[id]`).
+> * **Why**: This bypasses the "Welcome" screen and drops the user directly into the grid for testing.
 > 
 > 
-> * **Key Constraint**: Use a **fixed item size of 35px** (matching our `--row-height` design token).
-> * Set `count` to the total number of rows in the database (passed from the server-side base query).
+> **Task 2: Wiring the "+ Create" & Sidebar**
+> * Attach the `api.base.create.useMutation` to the Sidebar's **"+ Create"** button.
+> * Ensure the sidebar list of bases is clickable, using Next.js `Link` components to change the `baseId` in the URL.
 > 
 > 
-> **Task 2: Absolute Row Positioning**
-> * Do not use a standard `<table>` tag for the body, as it breaks virtualization.
-> * Render rows as `div` elements with `position: absolute`, `top: 0`, and `left: 0`.
-> * Use `transform: translateY(${virtualRow.start}px)` for each row to ensure hardware acceleration during scrolling.
+> **Task 3: The Infinite Data Pipe (Phase 4b Integration)**
+> * In `src/app/_components/Grid.tsx`, replace the hardcoded "Row Index" labels with real data.
+> * Use `api.row.listInfinite.useInfiniteQuery` to fetch rows in batches of 100.
+> * **Handshake**: Connect the TanStack Virtualizer's `virtualRows` to the data returned by the infinite query. If a row is currently "fetching," show a skeleton loader row.
 > 
 > 
-> **Task 3: Sticky Header & CSS Grid**
-> * Implement a sticky header row that remains at the top.
-> * Inside each row, use a **CSS Grid** or **Flexbox** where each cell has a fixed or percentage-based width to align perfectly with the headers.
-> * Match the border style `#e1e1e1` from the screenshots.
+> **Task 4: The 100k Row Performance Trigger**
+> * Wire the toolbar's **"+ Add 100k rows"** button to `api.row.startBulkInsert.useMutation`.
+> * Implement a "Loading Toast" using `sonner` or a simple state variable to show the user that the background job is running.
 > 
 > 
 > **Definition of Done**:
-> * On Vercel, I can scroll through a "white-space" viewport that is physically 15.5 million pixels tall (445k * 35px) without crashing the browser.
-> * The scrollbar reflects the massive data size, but the DOM only contains the ~30 rows currently visible.
+> * Upon login, I am automatically redirected to a base.
+> * The grid actually displays data (or skeleton rows) from the Neon DB.
+> * I can click "+ Create" and see a new base appear in the sidebar immediately.
+> * The app remains at 60fps even as the infinite query fetches the next batch of rows.
 > 
 > 
 
 ---
 
-### 🚀 Why we start here
+### 🚀 What this solves for you
 
-By finishing **4a** first, we verify that the **coordinate math** is correct. If the scrollbar doesn't feel right or the height is wrong, we fix it now before adding the complexity of data fetching.
+1. **Sidebar is no longer "Dead"**: You'll be able to create and switch between bases, which is the only way to test if the table renders correctly for different datasets.
+2. **Visual Confirmation**: You'll see the **445k rows** actually appearing in the cells as you scroll.
+3. **The "10M Row" Scale**: By wiring the bulk-insert button, you can push the database to 1 million+ rows while you watch the scrollbar get even smaller—proving the system doesn't break under extreme load.
 
-**Fire off 4a now.** Once you can scroll that "infinite" empty grid on Vercel, I will give you **Sub-Phase 4b**, where we start pouring the **445k rows** of data into those virtual slots.
+**Run this prompt now.** Once the buttons work and the rows are "real," we will move to the final performance hurdle: **Optimistic Cell Editing** and **Keyboard Navigation**.
 
-**Ready to see that scrollbar hit the bottom of 445k rows?**
+**Ready to see your actual data scrolling at 60fps?**
