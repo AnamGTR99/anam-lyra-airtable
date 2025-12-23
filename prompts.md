@@ -1,50 +1,64 @@
-**Massive win on the Auth, Anam!** Seeing that "Welcome to Airtable" screen means the "front door" is officially open and your new Vercel project is communicating perfectly with Google.
+Anam, you are 100% correct. Trying to shove virtualization, infinite scrolling, keyboard navigation, and optimistic editing into a single prompt is how bugs get "baked into" the foundation.
 
-Now, we need to address that layout. It's "broken" because the Sidebar is taking up too much width and the main content area has no structure. We're going to use a **Flexbox "Holy Grail" layout** to lock that sidebar to the left and give the workspace the clean, professional Airtable look.
+Breaking this into **Three Focused Sprints** ensures the agent handles the complex coordinate math of the virtualizer before we layer on the interaction logic. This is the professional way to build a high-performance engine.
 
 ---
 
-### 🎨 Hour 3: The "Airtable 1:1" UI Reconstruction
+### 🗺️ The Grid Implementation Roadmap
 
-**Copy and paste this into Antigravity (or your agent):**
+| Sub-Phase | Focus | PDF Requirement Addressed |
+| --- | --- | --- |
+| **4a: The Virtual Foundation** | Coordinate math, 60fps scrolling, 1M row height. | "Scroll down without lag" 
 
-> **Role**: Senior Frontend Architect
-> **Objective**: Hard-reset the UI layout to achieve a 1:1 match with the provided Airtable screenshots.
-> **Task 1: The Master Flex Layout**
-> * Refactor the root `layout.tsx` and the main dashboard page.
-> * Use a parent `div` with `className="flex h-screen w-screen overflow-hidden bg-white"`.
-> * **Sidebar**: Width MUST be locked at `260px`. Use `className="w-[260px] flex-shrink-0 h-full bg-[#f5f5f5] border-r border-[#e1e1e1] flex flex-col"`.
-> * **Main Content**: `className="flex-1 flex flex-col h-full overflow-hidden"`.
+ |
+| **4b: The Data Pipeline** | tRPC Infinite Query, bi-directional fetching. | "Virtualized infinite scroll" 
+
+ |
+| **4c: The Interaction Layer** | Arrow keys, Tab, Enter, Cell Editing. | "Arrow keys + tab key should move me smoothly" 
+
+ |
+
+---
+
+### 🛠️ Sub-Phase 4a: The Virtualized Foundation (Coordinate Math)
+
+**Copy and paste this into Antigravity:**
+
+> **Role**: Senior Performance Engineer
+> **Objective**: Implement the core virtualization shell using **TanStack Virtual v3** to handle the vertical scroll of 445k+ rows.
+> **Task 1: The High-Performance Viewport**
+> * Create a `GridContainer` component with `overflow: auto` and `position: relative`.
+> * Implement `useVirtualizer` targeting this container.
 > 
 > 
-> **Task 2: Sidebar Elements (1:1 Match)**
-> * Implement the navigation items ("Home", "Starred", "Workspaces") with `14px` font and `#666666` color.
-> * The **"+ Create"** button must be at the very bottom: `className="mt-auto m-4 bg-[#116df7] hover:bg-[#0e59ca] text-white rounded-full py-2 px-6 flex items-center justify-center font-medium"`.
+> * **Key Constraint**: Use a **fixed item size of 35px** (matching our `--row-height` design token).
+> * Set `count` to the total number of rows in the database (passed from the server-side base query).
 > 
 > 
-> **Task 3: The Header & Performance Toolbar**
-> * Inside the **Main Content** area, add a top header (`h-[56px]`) for Table Tabs matching `example base.png`.
-> * Add a secondary toolbar (`h-[48px]`) with buttons for "Grid view," "Hide fields," "Filter," and "Sort".
-> * **The Core Requirement**: Add a ghost button labeled **"+ Add 100k rows"** to the right side of this toolbar. Wire it to the `row.startBulkInsert` tRPC procedure.
+> **Task 2: Absolute Row Positioning**
+> * Do not use a standard `<table>` tag for the body, as it breaks virtualization.
+> * Render rows as `div` elements with `position: absolute`, `top: 0`, and `left: 0`.
+> * Use `transform: translateY(${virtualRow.start}px)` for each row to ensure hardware acceleration during scrolling.
 > 
 > 
-> **Task 4: Zero "Lyra" Branding**
-> * Audit the entire UI. Ensure the title is "Airtable", and no mentions of "Lyra" appear to the end-user.
+> **Task 3: Sticky Header & CSS Grid**
+> * Implement a sticky header row that remains at the top.
+> * Inside each row, use a **CSS Grid** or **Flexbox** where each cell has a fixed or percentage-based width to align perfectly with the headers.
+> * Match the border style `#e1e1e1` from the screenshots.
 > 
 > 
 > **Definition of Done**:
-> * The live site shows a stable Sidebar on the left and a wide, white workspace on the right.
-> * The visual styles (colors, padding, borders) match the screenshots exactly.
-> * `git push` to Vercel and verify the layout is identical to the screenshots on the `liart.vercel.app` domain.
+> * On Vercel, I can scroll through a "white-space" viewport that is physically 15.5 million pixels tall (445k * 35px) without crashing the browser.
+> * The scrollbar reflects the massive data size, but the DOM only contains the ~30 rows currently visible.
 > 
 > 
 
 ---
 
-### 🚀 What to expect next
+### 🚀 Why we start here
 
-With the Auth fixed, this UI push will finally make the app look like a finished product. You'll see the clean grey sidebar and the white grid area ready for data.
+By finishing **4a** first, we verify that the **coordinate math** is correct. If the scrollbar doesn't feel right or the height is wrong, we fix it now before adding the complexity of data fetching.
 
-**Fire that off.** Once you confirm the layout is "Pretty" and matching the screenshots, we move to **Hour 4: The TanStack Virtualized Grid**. That’s where we make those **445k rows** (and eventually 1M) scroll perfectly.
+**Fire off 4a now.** Once you can scroll that "infinite" empty grid on Vercel, I will give you **Sub-Phase 4b**, where we start pouring the **445k rows** of data into those virtual slots.
 
-**Should I start prepping the Grid Virtualizer code for you?**
+**Ready to see that scrollbar hit the bottom of 445k rows?**

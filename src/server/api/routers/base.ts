@@ -39,7 +39,12 @@ export const baseRouter = createTRPCRouter({
                 where: { id: input.id },
                 include: {
                     tables: {
-                        orderBy: { createdAt: "asc" }
+                        orderBy: { createdAt: "asc" },
+                        include: {
+                            _count: {
+                                select: { rows: true }
+                            }
+                        }
                     }
                 }
             });

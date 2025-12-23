@@ -6,6 +6,7 @@ import { BaseHeader } from "~/app/_components/BaseHeader";
 import { Toolbar } from "~/app/_components/Toolbar";
 import { use, useState, useEffect } from "react";
 import { GridSkeleton } from "~/app/_components/Skeleton";
+import { GridContainer } from "~/app/_components/Grid";
 
 export default function BasePage({ params }: { params: Promise<{ baseId: string }> }) {
     // Unwrap params (Next.js 15 requirement)
@@ -62,19 +63,15 @@ export default function BasePage({ params }: { params: Promise<{ baseId: string 
                     onBulkInsert={handleBulkInsert}
                 />
 
-                {/* Grid Placeholder */}
-                <div className="flex-1 bg-white overflow-hidden relative">
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-400 bg-gray-50/50">
-                        {activeTableId ? (
-                            <div className="text-center">
-                                <p className="mb-2">Table: {activeTableId}</p>
-                                <p className="text-sm">Grid Visualization Loading in Hour 4...</p>
-                                <p className="text-xs mt-4 text-gray-300">445k rows ready</p>
-                            </div>
-                        ) : (
-                            "Select a table"
-                        )}
-                    </div>
+                {/* Grid Visualization */}
+                <div className="flex-1 overflow-hidden relative">
+                    {activeTableId ? (
+                        <GridContainer count={base.tables.find((t) => t.id === activeTableId)?._count?.rows ?? 0} />
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-gray-400 bg-gray-50/50">
+                            Select a table
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
