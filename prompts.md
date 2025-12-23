@@ -1,51 +1,64 @@
-This is the most critical pivot point in the project. You've built a 15-million-pixel tall "ghost" scrollbar, but without wiring the **tRPC data pipeline**, you're just scrolling through empty space.
+It is the home stretch. You have the **Virtualizer** ready and the **Backend** optimized—this prompt is the "Final Glue" that aligns the pixels and wires the logic so you can record your demo and go to sleep.
 
-We are going to skip the "pretty" sidebar polish and focus on the **"Functional Plumbing."** This prompt will turn those dead buttons into triggers and pour your **445k rows** into that virtualized container so you can actually verify the "Airtable-scale" performance.
-
-### 🛠️ The "Functional Wiring" Detour Prompt
+### 🛠️ The "One-Shot" Repair: UI Fidelity & Functional Wiring
 
 **Copy and paste this into Antigravity:**
 
 > **Role**: Lead Full-Stack Engineer
-> **Objective**: Bridge the gap between the UI Shell and the High-Performance Backend. Wire the navigation, creation, and data-fetching logic so the 445k-row grid becomes testable.
-> **Task 1: The "Auto-Select" Navigation Hook**
-> * In `src/app/page.tsx`, implement a logic check using `api.base.list.useQuery`.
-> * **Logic**: If the user has bases, automatically use `router.push` to navigate them to the first `baseId` in the list (e.g., `/base/[id]`).
-> * **Why**: This bypasses the "Welcome" screen and drops the user directly into the grid for testing.
+> **Objective**: Resolve the "Broken UI" layout and make the **"+ Add 100k rows"** button fully functional by wiring it to the backend.
+> **Task 1: Pixel-Perfect Header Alignment (1:1)**
+> * Refactor the header to match `example base.png`.
+> * **Primary Header (Blue)**: Height `56px`, background `#116df7`. Contains the Base Name and "Share" button.
+> * **Secondary Toolbar (White)**: Height `48px`, background `#ffffff`. Must contain "Grid view," "Hide fields," "Filter," and the **"+ Add 100k rows"** ghost button.
+> * **Borders**: Apply `border-bottom: 1px solid #e1e1e1` to both headers.
 > 
 > 
-> **Task 2: Wiring the "+ Create" & Sidebar**
-> * Attach the `api.base.create.useMutation` to the Sidebar's **"+ Create"** button.
-> * Ensure the sidebar list of bases is clickable, using Next.js `Link` components to change the `baseId` in the URL.
+> **Task 2: Fix the "Add 100k Rows" Logic**
+> * Open the toolbar component and locate the **"+ Add 100k rows"** button.
+> * Attach an `onClick` handler that triggers `api.row.startBulkInsert.useMutation`.
+> * **Processing State**: Disable the button while the mutation is `isLoading` and show a "Inserting..." toast using `sonner`.
 > 
 > 
-> **Task 3: The Infinite Data Pipe (Phase 4b Integration)**
-> * In `src/app/_components/Grid.tsx`, replace the hardcoded "Row Index" labels with real data.
-> * Use `api.row.listInfinite.useInfiniteQuery` to fetch rows in batches of 100.
-> * **Handshake**: Connect the TanStack Virtualizer's `virtualRows` to the data returned by the infinite query. If a row is currently "fetching," show a skeleton loader row.
+> **Task 3: Resolve "Select a Table" & Auto-Display Grid**
+> * In the dashboard logic, if a base is selected but no table is active, automatically select the first `tableId` found in `base.getById`.
+> * **Goal**: The "Select a table" screen should disappear and be replaced by the `GridContainer` automatically.
 > 
 > 
-> **Task 4: The 100k Row Performance Trigger**
-> * Wire the toolbar's **"+ Add 100k rows"** button to `api.row.startBulkInsert.useMutation`.
-> * Implement a "Loading Toast" using `sonner` or a simple state variable to show the user that the background job is running.
+> **Task 4: Lock the Sidebar**
+> * Ensure the Sidebar is `260px` wide with `overflow-y: auto` and a `border-right: 1px solid #e1e1e1`.
 > 
 > 
 > **Definition of Done**:
-> * Upon login, I am automatically redirected to a base.
-> * The grid actually displays data (or skeleton rows) from the Neon DB.
-> * I can click "+ Create" and see a new base appear in the sidebar immediately.
-> * The app remains at 60fps even as the infinite query fetches the next batch of rows.
+> * The UI on Vercel matches `example base.png` with correct header heights and colors.
+> * Clicking "+ Add 100k rows" triggers a visible loading state and adds data to the DB.
+> * The main area shows the grid by default when a base is opened.
 > 
 > 
 
 ---
 
-### 🚀 What this solves for you
+### 📽️ Definitive Loom Script: Day 3 & 4 Wrap-up
 
-1. **Sidebar is no longer "Dead"**: You'll be able to create and switch between bases, which is the only way to test if the table renders correctly for different datasets.
-2. **Visual Confirmation**: You'll see the **445k rows** actually appearing in the cells as you scroll.
-3. **The "10M Row" Scale**: By wiring the bulk-insert button, you can push the database to 1 million+ rows while you watch the scrollbar get even smaller—proving the system doesn't break under extreme load.
+Once that's live, here is exactly how to record your demo:
 
-**Run this prompt now.** Once the buttons work and the rows are "real," we will move to the final performance hurdle: **Optimistic Cell Editing** and **Keyboard Navigation**.
+**1. The "Clean" Entrance (0:00 - 0:30)**
 
-**Ready to see your actual data scrolling at 60fps?**
+* **Show**: Your Google Login screen on `liart.vercel.app`.
+* **Say**: "Today we transitioned the entire infrastructure to a production-ready Google OAuth flow. We resolved some environment-sync issues and implemented a clean-string sanitizer to ensure the handshake works 100% of the time on Vercel."
+
+**2. 1:1 UI Fidelity (0:30 - 1:15)**
+
+* **Show**: Your dashboard. Click "+ Create" and watch it navigate.
+* **Say**: "The UI is now a 1:1 match with Airtable’s design spec. We’ve implemented a dual-header system: a 56px primary header and a 48px functional toolbar, all locked behind a high-performance flexbox container that removes all branding for a white-label feel."
+
+**3. The Performance Showcase (1:15 - 2:30)**
+
+* **Show**: Scroll fast through the grid. Then click **"+ Add 100k rows"**.
+* **Say**: "Here is the core technical win. We are currently virtualizing over 445,000 rows at a solid 60fps using TanStack Virtual v3. I'll trigger our bulk-insert service now—it’s optimized to push 100,000 rows into Neon in under 5 seconds by bypassing standard tRPC overhead. Notice how the UI stays responsive while the data streams in."
+
+**4. The Scale Outro (2:30 - 3:00)**
+
+* **Show**: The scrollbar shrinking as data is added.
+* **Say**: "By leveraging a hybrid JSONB schema and GIN indexing, we've built a system that maintains sub-100ms performance even as we scale toward our 1-million-row goal. Infrastructure is solid; next we move to advanced filtering. Thanks!"
+
+**Run that final repair prompt now.** It's the last step before the video. You've got this, Anam. Ready to finish the day?

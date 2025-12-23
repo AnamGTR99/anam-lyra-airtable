@@ -18,9 +18,9 @@ interface BaseHeaderProps {
 
 export function BaseHeader({ baseName, tables, activeTableId }: BaseHeaderProps) {
     return (
-        <div className="flex flex-col bg-[#116df7] text-white">
+        <div className="flex flex-col bg-[#116df7] text-white border-b border-[#e1e1e1]">
             {/* Top Bar: Data / Auto / Interfaces */}
-            <div className="flex items-center justify-between h-[48px] px-4">
+            <div className="flex items-center justify-between h-[56px] px-4">
                 <div className="flex items-center gap-4">
                     {/* Base Icon & Name */}
                     <div className="flex items-center gap-2 cursor-pointer hover:bg-white/10 px-2 py-1 rounded">
@@ -66,7 +66,7 @@ export function BaseHeader({ baseName, tables, activeTableId }: BaseHeaderProps)
             </div>
 
             {/* Table Tabs Bar */}
-            <div className="flex items-center h-[56px] px-2 bg-[#1b62cc] overflow-x-auto scrollbar-hide">
+            <div className="flex items-center h-[40px] px-2 bg-[#1b62cc] overflow-x-auto scrollbar-hide">
                 {tables.map(table => (
                     <div
                         key={table.id}
