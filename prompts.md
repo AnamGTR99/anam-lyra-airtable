@@ -1,181 +1,141 @@
-Below is a **surgical “Phase 0 reset” prompt** you can paste into Codex. It is designed to **delete everything not required for Phase 0**, while **preserving** your working Google auth, your T3 stack wiring, and your existing env-var contract.
+Great — this pinpoints it. Your env schema is **missing `AUTH_URL`** (or `NEXTAUTH_URL`) entirely. That’s why you’re stuck in `error=Configuration`.
 
-It assumes you already have:
+With Auth.js/NextAuth in App Router, you must provide a base URL via one of:
 
-* T3 stack scaffold
-* Google login working (NextAuth)
-* Deployable baseline
+* `AUTH_URL` (Auth.js) **recommended**
+* `NEXTAUTH_URL` (legacy)
+* or `AUTH_TRUST_HOST=true` (when you can’t set a stable URL)
 
----
-
-## Prompt: Phase 0 Cleanup — Keep Auth, Strip Everything Else
-
-**Role:** Senior T3 Engineer / Repo Surgeon
-**Goal:** Reduce the repo to **Phase 0 only**: working auth + minimal UI scaffold. Remove anything not essential yet, without breaking existing env vars or auth flow.
-
-### Context
-
-We are restarting the project implementation from a clean baseline. Phase 0 includes:
-
-* T3 stack intact (Next.js + tRPC + Prisma + NextAuth)
-* Google OAuth sign-in remains fully working
-* Minimal UI scaffold (home page + login/out + protected route)
-* Environment variables and deployment assumptions remain unchanged
-
-Anything beyond Phase 0 is **out of scope** and should be removed or stubbed.
+Right now your code provides none of those (your env validator doesn’t even allow it), so Auth throws a configuration error during callback.
 
 ---
 
-## Hard Requirements (Do Not Break)
+## Fix (minimal, correct, production-safe)
 
-1. **Auth must still work exactly as-is**
+### 1) Update `src/env.js` to include `AUTH_URL` and optionally `AUTH_TRUST_HOST`
 
-   * Google sign-in button works
-   * Session persists
-   * Protected page still protected
-   * Sign-out works
-2. **Environment variables must remain unchanged**
+Make these changes:
 
-   * Do not rename env vars
-   * Do not add new required env vars
-   * Preserve `.env.example` and any Vercel env usage patterns
-3. **Build must pass**
+#### Add to `server:` block
 
-   * `npm run lint`
-   * `npm run typecheck` (or `tsc`)
-   * `npm run build`
-4. **Prisma remains installed and functional**
+```ts
+AUTH_URL: z.string().url(),
+AUTH_TRUST_HOST: z
+  .preprocess((v) => v === "true", z.boolean())
+  .optional(),
+```
 
-   * Do not remove Prisma
-   * But you may simplify schema to minimum needed for auth only
+#### Add to `runtimeEnv:`
 
----
+```ts
+AUTH_URL: process.env.AUTH_URL,
+AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
+```
 
-## What to Delete / Remove (Aggressively)
+Your file becomes (only showing the relevant parts):
 
-Remove any code related to:
+```ts
+server: {
+  AUTH_SECRET:
+    process.env.NODE_ENV === "production"
+      ? z.string()
+      : z.string().optional(),
+  AUTH_URL: z.string().url(),
+  AUTH_TRUST_HOST: z
+    .preprocess((v) => v === "true", z.boolean())
+    .optional(),
 
-* Airtable UI / table rendering
-* virtualization
-* load-test scripts, ingestion worker, copy engine
-* faker seeding scripts
-* views, filters, sorting logic
-* complex services or “phase” docs not needed for Phase 0
+  AUTH_GOOGLE_ID: z.string(),
+  AUTH_GOOGLE_SECRET: z.string(),
+  DATABASE_URL: z.string().url(),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+},
 
-This includes deleting directories/files if present:
+runtimeEnv: {
+  AUTH_SECRET: process.env.AUTH_SECRET,
+  AUTH_URL: process.env.AUTH_URL,
+  AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
+  AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
+  AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
+  DATABASE_URL: process.env.DATABASE_URL,
+  NODE_ENV: process.env.NODE_ENV,
+},
+```
 
-* `ingestion-worker/`
-* `airtable UI/` or any UI experiments
-* any `load-test*.ts`, `verify-logic.ts`, bulk insert services
-* any large “plan” markdown files unrelated to Phase 0
-* any leftover scripts for Neon/Supabase benchmarking
-
-If unsure, keep only what is necessary to:
-
-* sign in with Google
-* show minimal pages
-* prove session protection
-
----
-
-## What to Keep (Minimal Phase 0 Scope)
-
-### Backend
-
-* NextAuth configuration and callbacks
-* Prisma adapter (if you use it)
-* Prisma schema necessary for auth tables only
-* tRPC scaffolding can remain, but **remove routers unrelated to auth**:
-
-  * Keep `health` or `example` router only if it’s minimal and used
-
-### Frontend
-
-* `Home` page:
-
-  * shows sign-in state
-  * if signed out: “Sign in with Google”
-  * if signed in: show user email/name + sign out
-  * a link/button to a protected page
-
-* `Protected` page:
-
-  * only accessible when signed in
-  * displays session details
-
-### UI/Styling
-
-* Keep whichever styling stack you already have (Tailwind, shadcn, etc.)
-* But remove unused components and routes
+This is the correct T3-style env wiring.
 
 ---
 
-## Concrete Refactor Steps (Codex should execute)
+### 2) Set the Vercel env vars (names + values)
 
-1. **Inventory current routes and routers**
+In Vercel, add:
 
-   * List pages/routes in `src/pages` or `src/app`
-   * List tRPC routers in `src/server/api/routers`
-   * Identify what is not Phase 0
+* `AUTH_URL`
+  `https://anam-lyra-airtable-liart.vercel.app`
 
-2. **Delete non-Phase-0 folders and scripts**
+Optional safety (useful if previews/custom domains):
 
-   * Remove ingestion worker and load test infrastructure
-   * Remove unused services (bulk insert, verification scripts, etc.)
-   * Remove dead UI experiments and unrelated components
+* `AUTH_TRUST_HOST`
+  `true`
 
-3. **Simplify Prisma schema**
-
-   * Keep only tables required for NextAuth + Prisma adapter
-   * Run `prisma generate`
-   * Ensure migrations still consistent (if using migrations, do not delete history—only adjust schema safely)
-
-4. **Simplify tRPC**
-
-   * Keep `api/root.ts` structure intact
-   * Remove routers not used
-   * Ensure `src/utils/api` still works
-
-5. **Minimal UI scaffold**
-
-   * Ensure home page has sign-in/out and protected link
-   * Ensure protected route is guarded
-   * No other pages
-
-6. **Verify env contract**
-
-   * Do not modify `.env`, `.env.local`, `.env.example` naming or keys
-   * Ensure no new env vars required to boot
-
-7. **Run and confirm**
-
-   * `npm run lint`
-   * `npm run typecheck` (or equivalent)
-   * `npm run build`
-   * `npm run dev` sanity check: login/out works
+You can keep `NEXTAUTH_URL` but it’s better to remove it to avoid confusion. Your code is now explicitly expecting `AUTH_URL`.
 
 ---
 
-## Acceptance Criteria
+### 3) Redeploy
 
-* Repo contains only Phase 0 functionality
-* Auth works unchanged
-* Minimal UI scaffold exists (home + protected)
-* No ingestion/load-test/bulk-insert code remains
-* Build + lint + typecheck all pass
-* Env vars remain identical (keys unchanged)
+Push the env.js change and redeploy. This is required.
 
 ---
 
-## Output Required from Codex
+## Google Console check (do this once)
 
-At the end, provide:
+Ensure your Google OAuth client has this redirect URI:
 
-1. A list of deleted files/folders
-2. A list of remaining routes/pages
-3. A list of remaining routers
-4. Confirmation that build/lint/typecheck passed
+```
+https://anam-lyra-airtable-liart.vercel.app/api/auth/callback/google
+```
+
+If that’s already correct, you’re fine.
 
 ---
 
-If you paste this prompt into Codex, it should reliably “trim the repo to Phase 0” without accidentally ripping out auth or env wiring.
+## Why this solves it
+
+The “Configuration” error is Auth.js saying: “I don’t know my canonical base URL, so I can’t validate the callback/session cookies correctly.”
+
+Adding `AUTH_URL` fixes that deterministically.
+
+---
+
+## Codex-ready prompt to apply the fix
+
+Paste this into Codex:
+
+**Role:** Senior T3 Engineer
+**Task:** Fix Auth.js configuration error on Vercel by adding required `AUTH_URL` support to env validation.
+
+**Instructions:**
+
+1. Edit `src/env.js` to add `AUTH_URL` (required URL string) and `AUTH_TRUST_HOST` (optional boolean from `"true"` string).
+2. Ensure both are included in `runtimeEnv`.
+3. Update `.env.example` to include `AUTH_URL` and optional `AUTH_TRUST_HOST`.
+4. Verify build passes locally.
+5. Commit changes.
+
+**Acceptance Criteria:**
+
+* Vercel no longer redirects to `/api/auth/error?error=Configuration`
+* Google login completes and session persists
+* `/api/auth/session` returns JSON successfully
+
+---
+
+## After you redeploy
+
+Test these URLs:
+
+* `/api/auth/session` (should return JSON, 200)
+* `/protected` (should render)
+
+If anything fails after that, paste the new Vercel error log. But this is the main blocker—once fixed, Phase 0 is truly done.
