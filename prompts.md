@@ -1,64 +1,181 @@
-It is the home stretch. You have the **Virtualizer** ready and the **Backend** optimized—this prompt is the "Final Glue" that aligns the pixels and wires the logic so you can record your demo and go to sleep.
+Below is a **surgical “Phase 0 reset” prompt** you can paste into Codex. It is designed to **delete everything not required for Phase 0**, while **preserving** your working Google auth, your T3 stack wiring, and your existing env-var contract.
 
-### 🛠️ The "One-Shot" Repair: UI Fidelity & Functional Wiring
+It assumes you already have:
 
-**Copy and paste this into Antigravity:**
-
-> **Role**: Lead Full-Stack Engineer
-> **Objective**: Resolve the "Broken UI" layout and make the **"+ Add 100k rows"** button fully functional by wiring it to the backend.
-> **Task 1: Pixel-Perfect Header Alignment (1:1)**
-> * Refactor the header to match `example base.png`.
-> * **Primary Header (Blue)**: Height `56px`, background `#116df7`. Contains the Base Name and "Share" button.
-> * **Secondary Toolbar (White)**: Height `48px`, background `#ffffff`. Must contain "Grid view," "Hide fields," "Filter," and the **"+ Add 100k rows"** ghost button.
-> * **Borders**: Apply `border-bottom: 1px solid #e1e1e1` to both headers.
-> 
-> 
-> **Task 2: Fix the "Add 100k Rows" Logic**
-> * Open the toolbar component and locate the **"+ Add 100k rows"** button.
-> * Attach an `onClick` handler that triggers `api.row.startBulkInsert.useMutation`.
-> * **Processing State**: Disable the button while the mutation is `isLoading` and show a "Inserting..." toast using `sonner`.
-> 
-> 
-> **Task 3: Resolve "Select a Table" & Auto-Display Grid**
-> * In the dashboard logic, if a base is selected but no table is active, automatically select the first `tableId` found in `base.getById`.
-> * **Goal**: The "Select a table" screen should disappear and be replaced by the `GridContainer` automatically.
-> 
-> 
-> **Task 4: Lock the Sidebar**
-> * Ensure the Sidebar is `260px` wide with `overflow-y: auto` and a `border-right: 1px solid #e1e1e1`.
-> 
-> 
-> **Definition of Done**:
-> * The UI on Vercel matches `example base.png` with correct header heights and colors.
-> * Clicking "+ Add 100k rows" triggers a visible loading state and adds data to the DB.
-> * The main area shows the grid by default when a base is opened.
-> 
-> 
+* T3 stack scaffold
+* Google login working (NextAuth)
+* Deployable baseline
 
 ---
 
-### 📽️ Definitive Loom Script: Day 3 & 4 Wrap-up
+## Prompt: Phase 0 Cleanup — Keep Auth, Strip Everything Else
 
-Once that's live, here is exactly how to record your demo:
+**Role:** Senior T3 Engineer / Repo Surgeon
+**Goal:** Reduce the repo to **Phase 0 only**: working auth + minimal UI scaffold. Remove anything not essential yet, without breaking existing env vars or auth flow.
 
-**1. The "Clean" Entrance (0:00 - 0:30)**
+### Context
 
-* **Show**: Your Google Login screen on `liart.vercel.app`.
-* **Say**: "Today we transitioned the entire infrastructure to a production-ready Google OAuth flow. We resolved some environment-sync issues and implemented a clean-string sanitizer to ensure the handshake works 100% of the time on Vercel."
+We are restarting the project implementation from a clean baseline. Phase 0 includes:
 
-**2. 1:1 UI Fidelity (0:30 - 1:15)**
+* T3 stack intact (Next.js + tRPC + Prisma + NextAuth)
+* Google OAuth sign-in remains fully working
+* Minimal UI scaffold (home page + login/out + protected route)
+* Environment variables and deployment assumptions remain unchanged
 
-* **Show**: Your dashboard. Click "+ Create" and watch it navigate.
-* **Say**: "The UI is now a 1:1 match with Airtable’s design spec. We’ve implemented a dual-header system: a 56px primary header and a 48px functional toolbar, all locked behind a high-performance flexbox container that removes all branding for a white-label feel."
+Anything beyond Phase 0 is **out of scope** and should be removed or stubbed.
 
-**3. The Performance Showcase (1:15 - 2:30)**
+---
 
-* **Show**: Scroll fast through the grid. Then click **"+ Add 100k rows"**.
-* **Say**: "Here is the core technical win. We are currently virtualizing over 445,000 rows at a solid 60fps using TanStack Virtual v3. I'll trigger our bulk-insert service now—it’s optimized to push 100,000 rows into Neon in under 5 seconds by bypassing standard tRPC overhead. Notice how the UI stays responsive while the data streams in."
+## Hard Requirements (Do Not Break)
 
-**4. The Scale Outro (2:30 - 3:00)**
+1. **Auth must still work exactly as-is**
 
-* **Show**: The scrollbar shrinking as data is added.
-* **Say**: "By leveraging a hybrid JSONB schema and GIN indexing, we've built a system that maintains sub-100ms performance even as we scale toward our 1-million-row goal. Infrastructure is solid; next we move to advanced filtering. Thanks!"
+   * Google sign-in button works
+   * Session persists
+   * Protected page still protected
+   * Sign-out works
+2. **Environment variables must remain unchanged**
 
-**Run that final repair prompt now.** It's the last step before the video. You've got this, Anam. Ready to finish the day?
+   * Do not rename env vars
+   * Do not add new required env vars
+   * Preserve `.env.example` and any Vercel env usage patterns
+3. **Build must pass**
+
+   * `npm run lint`
+   * `npm run typecheck` (or `tsc`)
+   * `npm run build`
+4. **Prisma remains installed and functional**
+
+   * Do not remove Prisma
+   * But you may simplify schema to minimum needed for auth only
+
+---
+
+## What to Delete / Remove (Aggressively)
+
+Remove any code related to:
+
+* Airtable UI / table rendering
+* virtualization
+* load-test scripts, ingestion worker, copy engine
+* faker seeding scripts
+* views, filters, sorting logic
+* complex services or “phase” docs not needed for Phase 0
+
+This includes deleting directories/files if present:
+
+* `ingestion-worker/`
+* `airtable UI/` or any UI experiments
+* any `load-test*.ts`, `verify-logic.ts`, bulk insert services
+* any large “plan” markdown files unrelated to Phase 0
+* any leftover scripts for Neon/Supabase benchmarking
+
+If unsure, keep only what is necessary to:
+
+* sign in with Google
+* show minimal pages
+* prove session protection
+
+---
+
+## What to Keep (Minimal Phase 0 Scope)
+
+### Backend
+
+* NextAuth configuration and callbacks
+* Prisma adapter (if you use it)
+* Prisma schema necessary for auth tables only
+* tRPC scaffolding can remain, but **remove routers unrelated to auth**:
+
+  * Keep `health` or `example` router only if it’s minimal and used
+
+### Frontend
+
+* `Home` page:
+
+  * shows sign-in state
+  * if signed out: “Sign in with Google”
+  * if signed in: show user email/name + sign out
+  * a link/button to a protected page
+
+* `Protected` page:
+
+  * only accessible when signed in
+  * displays session details
+
+### UI/Styling
+
+* Keep whichever styling stack you already have (Tailwind, shadcn, etc.)
+* But remove unused components and routes
+
+---
+
+## Concrete Refactor Steps (Codex should execute)
+
+1. **Inventory current routes and routers**
+
+   * List pages/routes in `src/pages` or `src/app`
+   * List tRPC routers in `src/server/api/routers`
+   * Identify what is not Phase 0
+
+2. **Delete non-Phase-0 folders and scripts**
+
+   * Remove ingestion worker and load test infrastructure
+   * Remove unused services (bulk insert, verification scripts, etc.)
+   * Remove dead UI experiments and unrelated components
+
+3. **Simplify Prisma schema**
+
+   * Keep only tables required for NextAuth + Prisma adapter
+   * Run `prisma generate`
+   * Ensure migrations still consistent (if using migrations, do not delete history—only adjust schema safely)
+
+4. **Simplify tRPC**
+
+   * Keep `api/root.ts` structure intact
+   * Remove routers not used
+   * Ensure `src/utils/api` still works
+
+5. **Minimal UI scaffold**
+
+   * Ensure home page has sign-in/out and protected link
+   * Ensure protected route is guarded
+   * No other pages
+
+6. **Verify env contract**
+
+   * Do not modify `.env`, `.env.local`, `.env.example` naming or keys
+   * Ensure no new env vars required to boot
+
+7. **Run and confirm**
+
+   * `npm run lint`
+   * `npm run typecheck` (or equivalent)
+   * `npm run build`
+   * `npm run dev` sanity check: login/out works
+
+---
+
+## Acceptance Criteria
+
+* Repo contains only Phase 0 functionality
+* Auth works unchanged
+* Minimal UI scaffold exists (home + protected)
+* No ingestion/load-test/bulk-insert code remains
+* Build + lint + typecheck all pass
+* Env vars remain identical (keys unchanged)
+
+---
+
+## Output Required from Codex
+
+At the end, provide:
+
+1. A list of deleted files/folders
+2. A list of remaining routes/pages
+3. A list of remaining routers
+4. Confirmation that build/lint/typecheck passed
+
+---
+
+If you paste this prompt into Codex, it should reliably “trim the repo to Phase 0” without accidentally ripping out auth or env wiring.

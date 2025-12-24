@@ -131,20 +131,3 @@ export const protectedProcedure = t.procedure
       },
     });
   });
-
-/**
- * Helper to ensure the current user owns the requested Base (or related resource).
- * Throws a TRPCError with code FORBIDDEN if the ownership check fails.
- */
-export async function ensureOwnership(userId: string, baseId: string) {
-  const base = await db.base.findUnique({
-    where: { id: baseId },
-    select: { createdById: true },
-  });
-  if (!base) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Base not found" });
-  }
-  if (base.createdById !== userId) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "You do not own this resource" });
-  }
-}

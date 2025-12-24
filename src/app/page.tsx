@@ -1,40 +1,45 @@
-import { db } from "~/server/db";
 import { auth } from "~/server/auth";
-import { redirect } from "next/navigation";
-import { Sidebar } from "~/app/_components/Sidebar";
+import Link from "next/link";
+
+import { SignInButton, SignOutButton } from "~/app/_components/AuthButtons";
 
 export default async function Home() {
   const session = await auth();
 
-  // If logged in, try to find last base
-  if (session?.user) {
-    const lastBase = await db.base.findFirst({
-      where: { createdById: session.user.id },
-      orderBy: { updatedAt: 'desc' }
-    });
-
-    if (lastBase) {
-      redirect(`/base/${lastBase.id}`);
-    }
-  }
-
-  // Fallback: Show Shell with Prompt
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-white">
-      <Sidebar />
-      <div className="flex-1 flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-[#111111] mb-2">Welcome to Airtable</h1>
-          <p className="text-[#666666]">Select a workspace or create a new base to get started.</p>
-          {!session && (
-            <div className="mt-6">
-              <a href="/api/auth/signin" className="px-4 py-2 bg-[#116df7] text-white rounded font-medium">
-                Sign In
-              </a>
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-6">
+      <div className="w-full max-w-xl rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+        <h1 className="text-2xl font-semibold text-gray-900">Lyra Phase 0</h1>
+        <p className="mt-2 text-sm text-gray-600">
+          Minimal auth scaffold for Google sign-in and a protected route.
+        </p>
+
+        {session?.user ? (
+          <div className="mt-6 space-y-4">
+            <div className="rounded-md bg-gray-50 p-4 text-sm text-gray-700">
+              <div className="font-medium text-gray-900">Signed in</div>
+              <div>{session.user.name ?? "Unnamed user"}</div>
+              <div>{session.user.email ?? "No email available"}</div>
             </div>
-          )}
-        </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/protected"
+                className="rounded bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+              >
+                Go to protected page
+              </Link>
+              <SignOutButton />
+            </div>
+          </div>
+        ) : (
+          <div className="mt-6 space-y-4">
+            <p className="text-sm text-gray-600">
+              You are signed out. Sign in with Google to view the protected page.
+            </p>
+            <SignInButton />
+          </div>
+        )}
       </div>
-    </div>
+    </main>
   );
 }
