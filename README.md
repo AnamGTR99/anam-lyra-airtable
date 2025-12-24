@@ -27,3 +27,14 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 ## How do I deploy this?
 
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+## Auth.js on Vercel
+
+Set these environment variables in Vercel so Auth.js can resolve the canonical base URL:
+
+```env
+AUTH_URL=https://your-vercel-domain
+AUTH_TRUST_HOST=true
+```
+
+Keep `AUTH_URL` aligned with your production domain to avoid `/api/auth/error?error=Configuration`.
